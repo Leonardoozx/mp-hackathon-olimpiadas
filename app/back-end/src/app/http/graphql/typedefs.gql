@@ -1,0 +1,69 @@
+extend type Query {
+  health: HealthResponse!
+
+  getEvents(input: IGetEventsPayload): TGetEventsResponse!
+}
+
+type HealthResponse {
+  uptime: String
+  timestamp: String
+}
+
+input IGetEventsPayload {
+  country: String
+  discipline: String
+  venue: String
+  date: String  # Assuming date will be passed as an ISO string
+  competitor: String
+  page: Int
+}
+
+type TGetEventsResponse {
+  data: [TEvent]
+  links: TLinks
+  meta: TMeta
+}
+
+type TCompetitor {
+  countryId: String
+  countryFlagUrl: String
+  competitorName: String
+  position: Int
+  resultPosition: String
+  resultWinnerLoserTie: String
+  resultMark: String
+}
+
+type TEvent {
+  id: Int
+  day: String
+  disciplineName: String
+  disciplinePictogram: String
+  name: String
+  venueName: String
+  eventName: String
+  detailedEventName: String
+  startDate: String
+  endDate: String
+  status: String
+  isMedalEvent: Int
+  isLive: Int
+  competitors: [TCompetitor]
+}
+
+type TLinks {
+  first: String
+  last: String
+  prev: String
+  next: String
+}
+
+type TMeta {
+  currentPage: Int
+  from: Int
+  lastPage: Int
+  path: String
+  perPage: Int
+  to: Int
+  total: Int
+}
