@@ -1,175 +1,219 @@
-# Microservice Codebase
+# Olympic Games 2024
 
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)]()
 
-This repository is a **template** to be used as a basis for creating microservices.
+## Overview
 
-Build a microservice if it fits into a [bounded context](https://martinfowler.com/bliki/BoundedContext.html)!
- 
+"Olympic Games 2024" is a microservice developed to provide information about Olympic events. The service exposes APIs using GraphQL, REST, and gRPC for interacting with event data.
+
 ## Architecture
 
-The hexagonal architecture, or ports and adapters architecture, is an architectural pattern used in software design. 
-It aims at creating loosely coupled application components that can be easily connected to their software environment by means of ports and adapters. 
-This makes components exchangeable at any level and facilitates test automation.
+The project follows a hexagonal architecture, also known as ports and adapters architecture. This pattern aims to create loosely coupled application components that can be easily connected to the software environment through ports and adapters, facilitating component replacement and test automation.
 
-*Read!* (**recommended**)
-
-- [The Twelve-Factor](https://12factor.net)
-- [Top-Ten Vulnerabilities](https://owasp.org/www-project-top-ten)
-
-*Recommended libs*
-
-- [Immutable](https://immutable-js.com) - To make immutable code;
-- [Dataloader](https://github.com/graphql/dataloader) - To reduce database query requests via batch and cache;
-- [Knex.js](https://knexjs.org) - To make queries;
-- [MongoDB](https://docs.mongodb.com/drivers/node/current) - To make queries;
-- [Turfjs](https://turfjs.org/docs) - Advanced geospatial analysis;
-- [joi](https://joi.dev) - Schema description language and data validator;
-- [bcrypt](https://github.com/kelektiv/node.bcrypt.js) - A library to help you hash passwords;
-
-## Basic structure
+## Basic Structure
 
 **domain**
 
- - `entities`: Use entities as class to instantiate objects;
- - `use-cases`: Business rules;
- - `services`: Apply the use cases to build the result;
+ - `use-cases`: Business logic.
+ - `services`: Apply use cases to build results.
  
 **interfaces**
 
- - Define contracts;
+ - Defines contracts.
 
 **controllers**
 
- - Entry point to the domain. Apply input validation and cache handling;
+ - Entry point to the domain. Applies input validation and cache handling (if needed).
 
- **adapters**
+**adapters**
 
-  - A class that transforms (adapts) one interface to another;
+ - Class that transforms (adapts) one interface to another.
 
 **app**
 
- - Application edge. I/O must be configured here;
+ - Application boundary. I/O should be configured here.
 
 ## Deploy
 
-Read: [Github Actions Documentation](https://docs.github.com/pt/actions)
+The project can be run locally or in a Docker container. To run the service, follow the instructions below:
 
-**OBS: To deploy to the test environment, you need to run the workflow manually.**
+### Run Locally
 
-## Quickstart
+1. **Install dependencies and start the service:**
 
-Generate a new repo with this template.
+    ```bash
+    make install
+    make start-http
+    ```
 
-### Change the environment variables in the `Makefile`
+    The service will be available at http://localhost:4000/graphql.
 
-### Install dependencies and run
+    Check if it is working:
 
-```bash
-make install
-```
-```bash
-make start-http
-```
-*running on [http://localhost:4000/graphql](http://localhost:4000/graphql)*
+    ```bash
+    curl --location -g --request GET 'http://localhost:4000/graphql?query={health(input:{name:%22Foobar%22}){message}}'
+    Expected response:
+    ```
 
-Check if it's running
-```bash
-curl --location -g --request GET 'http://localhost:4000/graphql?query={welcome(input:{name:%22Foobar%22}){message}}'
-```
-Response
-```json
-{
-    "data": {
-        "welcome": {
-            "message": "Welcome, Foobar!"
+    ```json
+    {
+      "data": {
+        "health": {
+          "uptime": "10",
+          "timestamp": "2024-10-22" // YYYY-MM-DD
         }
+      }
     }
-}
-```
+    ```
 
-**Delete the "welcome" sample code**
+## Docker container
 
-find references
-
-- `grep -rn "Welcome" src/; grep -rn "Welcome" tests/;`
-- `find src/ -iname *Welcome*; find tests/ -iname *Welcome*`
-
-**Rename the name "microservice-codebase" throughout the project**
-
-find references
-
-- `grep -rn "microservice-codebase" .`
-
-### Useful commands
-
-```bash
-make run-tests
-```
-```bash
-make run-sonar
-```
 ```bash
 make docker-build
 ```
+
+Run the Docker container:
+
 ```bash
 make docker-run
 ```
+The service will be available on the ports specified in the Makefile (default: 4000 for GraphQL and 50051 for gRPC).
+
+## Useful Commands
+
+Run tests:
 ```bash
-npm run lint
+make run-tests
 ```
+
+Run build:
 ```bash
 make build
 ```
 
-### Dependencies and scripts
-
-See file `package.json` in project root.
-
----------------------------------------------------------------------------
-
-## How use
-
-### Logger
-
-A logger instance is available in all controllers, services and usecases
-
-*Error*
-```javascript
-this.logger.error(new Error('I'm an exception!'))
-```
-*Info*
-```javascript
-this.logger.log('I'm a message!')
-```
-
-### Cache
-
-A cache instance is available in all controllers
-
-*Get*
+Run the linter:
 ```bash
-let key = 'foobar'
-let data = this.cache.handle(key)
-```
-*Set*
-```bash
-let key = 'foobar'
-this.cache.handle(key, { foo: 'bar' })
-```
-*Generate key* (**Use generated hashes as keys for cache**)
-```bash
-let text = 'foobar'
-let hash = this.cache.generateKey(key)
-// output: 'Zm9vYmFy'
+npm run lint
 ```
 
----------------------------------------------------------------------------
+## APIs
+### GraphQL
 
-## See good practice guidelines
+- Query: GetEvents
 
-Changes or problems, discuss with the chapter!
+  ```
+  query GetEvents($input: IGetEventsPayload) {
+    getEvents(input: $input) {
+      data {
+        id
+        day
+        disciplineName
+        disciplinePictogram
+        name
+        venueName
+        eventName
+        detailedEventName
+        startDate
+        endDate
+        status
+        isMedalEvent
+        isLive
+        competitors {
+          countryId
+          countryFlagUrl
+          competitorName
+          position
+          resultPosition
+          resultWinnerLoserTie
+          resultMark
+        }
+      }
+      links {
+        first
+        last
+        prev
+        next
+      }
+      meta {
+        currentPage
+        from
+        lastPage
+        path
+        perPage
+        to
+        total
+      }
+    }
+  }
+  ```
 
----------------------------------------------------------------------------
+  Payload example:
 
-keep it simple, stupid
+  ```json
+  {
+    "input": {
+      "country": "USA",
+      "discipline": "Basketball",
+      "venue": "Stadium",
+      "date": "2024-08-01",
+      "competitor": "John Doe",
+      "page": 1
+    }
+  }
+  ```
+
+  Response example:
+
+  ```json
+  {
+    "data": {
+      "getEvents": {
+        "data": [
+          {
+            "id": 1,
+            "day": "2024-08-01",
+            "disciplineName": "Basketball",
+            "disciplinePictogram": "🏀",
+            "name": "Men's Basketball Final",
+            "venueName": "Stadium",
+            "eventName": "Final",
+            "detailedEventName": "Men's Basketball Final",
+            "startDate": "2024-08-01T10:00:00Z",
+            "endDate": "2024-08-01T12:00:00Z",
+            "status": "Scheduled",
+            "isMedalEvent": 1,
+            "isLive": 0,
+            "competitors": [
+              {
+                "countryId": "USA",
+                "countryFlagUrl": "https://example.com/flags/usa.png",
+                "competitorName": "John Doe",
+                "position": 1,
+                "resultPosition": "Gold",
+                "resultWinnerLoserTie": "Win",
+                "resultMark": "98"
+              }
+            ]
+          }
+        ],
+        "links": {
+          "first": "/graphql?query={getEvents(input:{page:1})}",
+          "last": "/graphql?query={getEvents(input:{page:10})}",
+          "prev": null,
+          "next": "/graphql?query={getEvents(input:{page:2})}"
+        },
+        "meta": {
+          "currentPage": 1,
+          "from": 1,
+          "lastPage": 10,
+          "path": "/graphql",
+          "perPage": 10,
+          "to": 10,
+          "total": 100
+        }
+      }
+    }
+  }
+  ```
+
+#### Keep it simple!
