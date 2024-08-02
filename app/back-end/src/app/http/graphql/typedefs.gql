@@ -13,7 +13,7 @@ input IGetEventsPayload {
   country: String
   discipline: String
   venue: String
-  date: String  # Assuming date will be passed as an ISO string
+  date: String
   competitor: String
   page: Int
 }
