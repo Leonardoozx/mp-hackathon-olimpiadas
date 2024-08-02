@@ -8,7 +8,7 @@ message GetEventsPayload {
   string country = 1;
   string discipline = 2;
   string venue = 3;
-  string date = 4;  // Use ISO 8601 string representation
+  string date = 4;
   string competitor = 5;
   int32 page = 6;
 }
